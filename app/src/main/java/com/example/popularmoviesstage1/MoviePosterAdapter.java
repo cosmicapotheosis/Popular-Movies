@@ -55,6 +55,7 @@ public class MoviePosterAdapter extends
                 .load(posterUrl)
                 .placeholder(R.drawable.loading)
                 .error(R.drawable.error)
+                .fit()
                 .into(moviePosterAdapterViewHolder.mMoviePosterImageView);
     }
 
