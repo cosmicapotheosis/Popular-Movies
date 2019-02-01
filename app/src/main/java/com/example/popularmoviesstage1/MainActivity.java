@@ -5,13 +5,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.popularmoviesstage1.model.Movie;
+import com.example.popularmoviesstage1.network.MovieService;
+import com.example.popularmoviesstage1.network.RetrofitClientInstance;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Callback;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.recyclerview_posters) RecyclerView mRecyclerView;
 
     private MoviePosterAdapter mMoviePosterAdapter;
+
+
 
 
     @Override
@@ -41,6 +52,23 @@ public class MainActivity extends AppCompatActivity {
         mMoviePosterAdapter = new MoviePosterAdapter();
 
         mRecyclerView.setAdapter(mMoviePosterAdapter);
+
+        /*Create handle for the RetrofitInstance interface*/
+        MovieService service = RetrofitClientInstance.getRetrofitInstance().create(MovieService.class);
+        // put below into its own method and call the method
+        Call<List<Movie>> call = service.getPopularMovies(Integer.toString(R.string.api_key));
+        call.enqueue(new Callback<List<Movie>>() {
+            @Override
+            public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
+//                progressDoalog.dismiss();
+//                generateDataList(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<Movie>> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // For now just load a bunch of the same movie poster into the adapter
         // http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
