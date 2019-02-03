@@ -1,6 +1,7 @@
 package com.example.popularmoviesstage1.network;
 
 import com.example.popularmoviesstage1.model.Movie;
+import com.example.popularmoviesstage1.model.MovieList;
 
 import java.util.List;
 
@@ -12,10 +13,10 @@ import retrofit2.http.Query;
 public interface MovieService {
 
 
-    @GET("/popular")
-    Call<List<Movie>> getPopularMovies(@Query("api_key") String api_key);
+    @GET("/3/movie/popular")
+    Call<MovieList> getPopularMovies(@Query("api_key") String api_key);
 
-    @GET("/top_rated")
-    Call<List<Movie>> getTopRatedMovies(@Query("api_key") String api_key);
+    @GET("/3/movie/top_rated")
+    Call<MovieList> getTopRatedMovies(@Query("api_key") String api_key);
 
 }

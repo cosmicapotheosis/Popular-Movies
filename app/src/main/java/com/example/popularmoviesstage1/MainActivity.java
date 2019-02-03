@@ -8,12 +8,15 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.popularmoviesstage1.model.Movie;
+import com.example.popularmoviesstage1.model.MovieList;
 import com.example.popularmoviesstage1.network.MovieService;
 import com.example.popularmoviesstage1.network.RetrofitClientInstance;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -32,10 +35,11 @@ public class MainActivity extends AppCompatActivity {
     // TODO (4) place posters into grid view using picasso
 
     @BindView(R.id.recyclerview_posters) RecyclerView mRecyclerView;
+    @BindView(R.id.json) TextView jsonResponse;
 
     private MoviePosterAdapter mMoviePosterAdapter;
 
-
+    ArrayList<Movie> response1;
 
 
     @Override
@@ -56,17 +60,26 @@ public class MainActivity extends AppCompatActivity {
         /*Create handle for the RetrofitInstance interface*/
         MovieService service = RetrofitClientInstance.getRetrofitInstance().create(MovieService.class);
         // put below into its own method and call the method
-        Call<List<Movie>> call = service.getPopularMovies(Integer.toString(R.string.api_key));
-        call.enqueue(new Callback<List<Movie>>() {
+        //Call<List<Movie>> call = service.getPopularMovies(BuildConfig.ApiKey);
+        Call<MovieList> call = service.getPopularMovies(getString(R.string.api_key));
+        call.enqueue(new Callback<MovieList>() {
             @Override
-            public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
+            public void onResponse(Call<MovieList> call, Response<MovieList> response) {
 //                progressDoalog.dismiss();
 //                generateDataList(response.body());
+                Toast.makeText(MainActivity.this, "API response ok!", Toast.LENGTH_SHORT).show();
+                response1 = response.body().getMovieArrayList();
+                Movie firstMovie = response1.get(0);
+                String firstPoster = firstMovie.getPoster_path();
+
+                jsonResponse.setText(firstPoster);
             }
 
             @Override
-            public void onFailure(Call<List<Movie>> call, Throwable t) {
+            public void onFailure(Call<MovieList> call, Throwable t) {
                 Toast.makeText(MainActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+                //response1 = t.toString();
+                //jsonResponse.setText(response1);
             }
         });
 
