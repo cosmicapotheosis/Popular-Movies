@@ -5,10 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.popularmoviesstage1.model.Movie;
@@ -17,7 +15,6 @@ import com.example.popularmoviesstage1.network.MovieService;
 import com.example.popularmoviesstage1.network.RetrofitClientInstance;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,19 +24,13 @@ import retrofit2.Callback;
 
 public class MainActivity extends AppCompatActivity {
 
-    // API URLs
-    // TODO (1) Get list of movies http://api.themoviedb.org/3/movie/popular?api_key=[YOUR_API_KEY]
-    //    or http://api.themoviedb.org/3/movie/top_rated?api_key=[YOUR_API_KEY]
-    // TODO (2) from results, get poster_path from each result
-    // TODO (3) append poster path to tmdb url https://image.tmdb.org/t/p/w185/[poster_path]
-    // TODO (4) place posters into grid view using picasso
-
     @BindView(R.id.recyclerview_posters) RecyclerView mRecyclerView;
-    @BindView(R.id.json) TextView jsonResponse;
 
     private MoviePosterAdapter mMoviePosterAdapter;
 
-    ArrayList<Movie> response1;
+    private ArrayList<Movie> mMoviesList;
+
+    private MovieService service;
 
 
     @Override
@@ -58,40 +49,9 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mMoviePosterAdapter);
 
         /*Create handle for the RetrofitInstance interface*/
-        MovieService service = RetrofitClientInstance.getRetrofitInstance().create(MovieService.class);
-        // put below into its own method and call the method
-        //Call<List<Movie>> call = service.getPopularMovies(BuildConfig.ApiKey);
-        Call<MovieList> call = service.getPopularMovies(getString(R.string.api_key));
-        call.enqueue(new Callback<MovieList>() {
-            @Override
-            public void onResponse(Call<MovieList> call, Response<MovieList> response) {
-//                progressDoalog.dismiss();
-//                generateDataList(response.body());
-                Toast.makeText(MainActivity.this, "API response ok!", Toast.LENGTH_SHORT).show();
-                response1 = response.body().getMovieArrayList();
-                Movie firstMovie = response1.get(0);
-                String firstPoster = firstMovie.getPoster_path();
+        service = RetrofitClientInstance.getRetrofitInstance().create(MovieService.class);
 
-                jsonResponse.setText(firstPoster);
-            }
-
-            @Override
-            public void onFailure(Call<MovieList> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
-                //response1 = t.toString();
-                //jsonResponse.setText(response1);
-            }
-        });
-
-        // For now just load a bunch of the same movie poster into the adapter
-        // http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
-        String[] tempPosters = new String[20];
-        for (int i = 0; i < tempPosters.length; i++) {
-            tempPosters[i] = "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg";
-        }
-        mMoviePosterAdapter.setMoviePosterUrls(tempPosters);
-
-        // make network request and populate grid views..
+        getPopularMovies();
     }
 
     @Override
@@ -108,14 +68,69 @@ public class MainActivity extends AppCompatActivity {
             Context context = MainActivity.this;
             String textToShow = "Sorting movies by popularity...";
             Toast.makeText(context, textToShow, Toast.LENGTH_SHORT).show();
+            getPopularMovies();
             return true;
         } else if (itemThatWasClickedId == R.id.sort_by_rating) {
             // make network request and populate grid views..
             Context context = MainActivity.this;
             String textToShow = "Sorting movies by rating...";
             Toast.makeText(context, textToShow, Toast.LENGTH_SHORT).show();
+            getTopRatedMovies();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void getPopularMovies() {
+        //Call<List<Movie>> call = service.getPopularMovies(BuildConfig.ApiKey);
+        Call<MovieList> call = service.getPopularMovies(getString(R.string.api_key));
+        call.enqueue(new Callback<MovieList>() {
+            @Override
+            public void onResponse(Call<MovieList> call, Response<MovieList> response) {
+
+                mMoviesList = response.body().getMovieArrayList();
+
+                String[] posters = new String[20];
+
+                for (int i = 0; i < mMoviesList.size(); i++) {
+                    Movie movie = mMoviesList.get(i);
+                    String posterPath = movie.getPoster_path();
+                    posters[i] = "http://image.tmdb.org/t/p/w185/" + posterPath;
+                }
+
+                mMoviePosterAdapter.setMoviePosterUrls(posters);
+            }
+
+            @Override
+            public void onFailure(Call<MovieList> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void getTopRatedMovies() {
+        Call<MovieList> call = service.getTopRatedMovies(getString(R.string.api_key));
+        call.enqueue(new Callback<MovieList>() {
+            @Override
+            public void onResponse(Call<MovieList> call, Response<MovieList> response) {
+
+                mMoviesList = response.body().getMovieArrayList();
+
+                String[] posters = new String[20];
+
+                for (int i = 0; i < mMoviesList.size(); i++) {
+                    Movie movie = mMoviesList.get(i);
+                    String posterPath = movie.getPoster_path();
+                    posters[i] = "http://image.tmdb.org/t/p/w185/" + posterPath;
+                }
+
+                mMoviePosterAdapter.setMoviePosterUrls(posters);
+            }
+
+            @Override
+            public void onFailure(Call<MovieList> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
