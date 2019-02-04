@@ -22,7 +22,8 @@ import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Callback;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements MoviePosterAdapter.ListItemClickListener {
 
     @BindView(R.id.recyclerview_posters) RecyclerView mRecyclerView;
 
@@ -31,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Movie> mMoviesList;
 
     private MovieService service;
+
+    private Toast mToast;
 
 
     @Override
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
 
-        mMoviePosterAdapter = new MoviePosterAdapter();
+        mMoviePosterAdapter = new MoviePosterAdapter(this);
 
         mRecyclerView.setAdapter(mMoviePosterAdapter);
 
@@ -52,6 +55,15 @@ public class MainActivity extends AppCompatActivity {
         service = RetrofitClientInstance.getRetrofitInstance().create(MovieService.class);
         // To begin with, sort movies by popular
         getPopularMovies();
+    }
+
+    @Override
+    public void onListItemClick(int clickedItemIndex) {
+        String movieTitle = mMoviesList.get(clickedItemIndex).getTitle();
+        String toastMessage = movieTitle + " clicked.";
+        mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_LONG);
+
+        mToast.show();
     }
 
     @Override

@@ -15,6 +15,23 @@ public class MoviePosterAdapter extends
     // The URLS received from moviedb API
     private String[] mMoviePosterUrls;
 
+    /*
+     * An on-click handler that we've defined to make it easy for an Activity to interface with
+     * our RecyclerView
+     */
+    final private ListItemClickListener mOnClickListener;
+
+    /**
+     * The interface that receives onClick messages.
+     */
+    public interface ListItemClickListener {
+        void onListItemClick(int clickedItemIndex);
+    }
+
+    public MoviePosterAdapter(ListItemClickListener listener) {
+        mOnClickListener = listener;
+    }
+
     /**
      * This gets called when each new ViewHolder is created. This happens when the RecyclerView
      * is laid out. Enough ViewHolders will be created to fill the screen and allow for scrolling.
@@ -81,13 +98,25 @@ public class MoviePosterAdapter extends
         notifyDataSetChanged();
     }
 
-    public class MoviePosterAdapterViewHolder extends RecyclerView.ViewHolder {
+    public class MoviePosterAdapterViewHolder extends RecyclerView.ViewHolder
+    implements View.OnClickListener {
 
         public final ImageView mMoviePosterImageView;
 
         public MoviePosterAdapterViewHolder(View view) {
             super(view);
             mMoviePosterImageView = (ImageView) view.findViewById(R.id.iv_movie_poster);
+            view.setOnClickListener(this);
+        }
+
+        /**
+         * Called whenever a user clicks on an item in the list.
+         * @param v The View that was clicked
+         */
+        @Override
+        public void onClick(View v) {
+            int clickedPosition = getAdapterPosition();
+            mOnClickListener.onListItemClick(clickedPosition);
         }
     }
 }
