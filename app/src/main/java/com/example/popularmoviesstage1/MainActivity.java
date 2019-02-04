@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         /*Create handle for the RetrofitInstance interface*/
         service = RetrofitClientInstance.getRetrofitInstance().create(MovieService.class);
-
+        // To begin with, sort movies by popular
         getPopularMovies();
     }
 
@@ -81,6 +81,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Call moviedb popular movies API and save the response to mMoviesList.
+     * Iterate through mMoviesList and save the poster paths to the posters array.
+     * Use posters array to populate recycler view.
+     */
     private void getPopularMovies() {
         //Call<List<Movie>> call = service.getPopularMovies(BuildConfig.ApiKey);
         Call<MovieList> call = service.getPopularMovies(getString(R.string.api_key));
@@ -103,11 +108,16 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<MovieList> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Something went wrong... Please try later!", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    /**
+     * Call moviedb top rated movies API and save the response to mMoviesList.
+     * Iterate through mMoviesList and save the poster paths to the posters array.
+     * Use posters array to populate recycler view.
+     */
     private void getTopRatedMovies() {
         Call<MovieList> call = service.getTopRatedMovies(getString(R.string.api_key));
         call.enqueue(new Callback<MovieList>() {
