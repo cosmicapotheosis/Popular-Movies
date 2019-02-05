@@ -1,8 +1,11 @@
 package com.example.popularmoviesstage1.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-public class Movie {
+public class Movie implements Parcelable {
 
     @SerializedName("vote_count")
     private int vote_count;
@@ -161,5 +164,59 @@ public class Movie {
 
     public void setRelease_date(String release_date) {
         this.release_date = release_date;
+    }
+
+    protected Movie(Parcel in) {
+        vote_count = in.readInt();
+        id = in.readInt();
+        // https://stackoverflow.com/questions/6201311/how-to-read-write-a-boolean-when-implementing-the-parcelable-interface
+        video = in.readByte() != 0;
+        vote_average = in.readFloat();
+        title = in.readString();
+        popularity = in.readByte();
+        poster_path = in.readString();
+        original_language = in.readString();
+        original_title = in.readString();
+        genre_ids = in.createIntArray();
+        backdrop_path = in.readString();
+        adult = in.readByte() != 0;
+        overview = in.readString();
+        release_date = in.readString();
+    }
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(vote_count);
+        parcel.writeInt(id);
+        // https://stackoverflow.com/questions/6201311/how-to-read-write-a-boolean-when-implementing-the-parcelable-interface
+        parcel.writeByte((byte) (video ? 1 : 0));
+        parcel.writeFloat(vote_average);
+        parcel.writeString(title);
+        parcel.writeFloat(popularity);
+        parcel.writeString(poster_path);
+        parcel.writeString(original_language);
+        parcel.writeString(original_title);
+        parcel.writeIntArray(genre_ids);
+        parcel.writeString(backdrop_path);
+        parcel.writeByte((byte) (adult ? 1 : 0));
+        parcel.writeString(overview);
+        parcel.writeString(release_date);
     }
 }

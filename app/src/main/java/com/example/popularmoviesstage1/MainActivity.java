@@ -1,6 +1,7 @@
 package com.example.popularmoviesstage1;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity
 
         mRecyclerView.setAdapter(mMoviePosterAdapter);
 
-        /*Create handle for the RetrofitInstance interface*/
+        // Create handle for the RetrofitInstance interface
         service = RetrofitClientInstance.getRetrofitInstance().create(MovieService.class);
         // To begin with, sort movies by popular
         getPopularMovies();
@@ -59,11 +60,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onListItemClick(int clickedItemIndex) {
-        String movieTitle = mMoviesList.get(clickedItemIndex).getTitle();
-        String toastMessage = movieTitle + " clicked.";
-        mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_LONG);
-
-        mToast.show();
+        Context context = MainActivity.this;
+        Class destinationActivity = DetailActivity.class;
+        Intent startDetailActivityIntent = new Intent(context, destinationActivity);
+        Movie movieToPass = mMoviesList.get(clickedItemIndex);
+        startDetailActivityIntent.putExtra("Movie", movieToPass);
+        startActivity(startDetailActivityIntent);
     }
 
     @Override
