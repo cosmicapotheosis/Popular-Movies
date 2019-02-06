@@ -34,9 +34,6 @@ public class MainActivity extends AppCompatActivity
 
     private MovieService service;
 
-    private Toast mToast;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,8 +98,7 @@ public class MainActivity extends AppCompatActivity
      * Use posters array to populate recycler view.
      */
     private void getPopularMovies() {
-        //Call<List<Movie>> call = service.getPopularMovies(BuildConfig.ApiKey);
-        Call<MovieList> call = service.getPopularMovies(getString(R.string.api_key));
+        Call<MovieList> call = service.getPopularMovies(BuildConfig.ApiKey);
         call.enqueue(new Callback<MovieList>() {
             @Override
             public void onResponse(Call<MovieList> call, Response<MovieList> response) {
@@ -132,8 +128,9 @@ public class MainActivity extends AppCompatActivity
      * Iterate through mMoviesList and save the poster paths to the posters array.
      * Use posters array to populate recycler view.
      */
+    // TODO (1) fix API KEY STORAGE
     private void getTopRatedMovies() {
-        Call<MovieList> call = service.getTopRatedMovies(getString(R.string.api_key));
+        Call<MovieList> call = service.getTopRatedMovies(BuildConfig.ApiKey);
         call.enqueue(new Callback<MovieList>() {
             @Override
             public void onResponse(Call<MovieList> call, Response<MovieList> response) {

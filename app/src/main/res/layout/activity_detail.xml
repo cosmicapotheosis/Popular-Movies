@@ -19,7 +19,7 @@
             tools:context="com.udacity.sandwichclub.DetailActivity" >
 
             <ImageView
-                android:id="@+id/image_iv"
+                android:id="@+id/poster_iv"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:adjustViewBounds="true"
