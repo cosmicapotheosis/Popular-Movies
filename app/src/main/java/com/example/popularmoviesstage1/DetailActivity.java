@@ -12,6 +12,7 @@ import org.w3c.dom.Text;
 
 public class DetailActivity extends AppCompatActivity {
 
+    // Use Butterknife to set views
     TextView mVoteCount;
     TextView mId;
     TextView mVideo;
@@ -27,6 +28,10 @@ public class DetailActivity extends AppCompatActivity {
     TextView mOverview;
     TextView mReleaseDate;
 
+    /**
+     * Check that a Movie object was passed as extra, then populate the UI based on that Movie data.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +45,9 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Set the text and image views based on passed extra data.
+     */
     private void populateUI() {
 
     }

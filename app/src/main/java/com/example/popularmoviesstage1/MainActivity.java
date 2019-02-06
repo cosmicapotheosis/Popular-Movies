@@ -15,6 +15,8 @@ import com.example.popularmoviesstage1.model.MovieList;
 import com.example.popularmoviesstage1.network.MovieService;
 import com.example.popularmoviesstage1.network.RetrofitClientInstance;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -41,12 +43,11 @@ public class MainActivity extends AppCompatActivity
 
         ButterKnife.bind(this);
 
+        // Lay out posters in a dynamic 2x10 grid
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
-
         mMoviePosterAdapter = new MoviePosterAdapter(this);
-
         mRecyclerView.setAdapter(mMoviePosterAdapter);
 
         // Create handle for the RetrofitInstance interface
@@ -55,6 +56,11 @@ public class MainActivity extends AppCompatActivity
         getPopularMovies();
     }
 
+    /**
+     * Use the list index to define the Movie object that is passed as an extra to the detail activity.
+     * Movie object implements parcelable in order to be passed as extra.
+     * @param clickedItemIndex
+     */
     @Override
     public void onListItemClick(int clickedItemIndex) {
         Context context = MainActivity.this;
@@ -71,6 +77,11 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Allows the user to choose the sort criteria for the displayed posters.
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClickedId = item.getItemId();
@@ -98,22 +109,33 @@ public class MainActivity extends AppCompatActivity
      * Use posters array to populate recycler view.
      */
     private void getPopularMovies() {
+        // API key stored in ~/.gradle/gradle.properties
         Call<MovieList> call = service.getPopularMovies(BuildConfig.ApiKey);
         call.enqueue(new Callback<MovieList>() {
             @Override
             public void onResponse(Call<MovieList> call, Response<MovieList> response) {
+                if (response.isSuccessful()) {
+                    // save the response as a list of movies
+                    mMoviesList = response.body().getMovieArrayList();
+                    // only display 20 posters
+                    String[] posters = new String[20];
 
-                mMoviesList = response.body().getMovieArrayList();
+                    for (int i = 0; i < mMoviesList.size(); i++) {
+                        Movie movie = mMoviesList.get(i);
+                        String posterPath = movie.getPoster_path();
+                        posters[i] = "http://image.tmdb.org/t/p/w185/" + posterPath;
+                    }
 
-                String[] posters = new String[20];
-
-                for (int i = 0; i < mMoviesList.size(); i++) {
-                    Movie movie = mMoviesList.get(i);
-                    String posterPath = movie.getPoster_path();
-                    posters[i] = "http://image.tmdb.org/t/p/w185/" + posterPath;
+                    mMoviePosterAdapter.setMoviePosterUrls(posters);
+                // handle network errors here
+                } else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Toast.makeText(MainActivity.this, jObjError.getString("message"), Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
                 }
-
-                mMoviePosterAdapter.setMoviePosterUrls(posters);
             }
 
             @Override
@@ -128,24 +150,31 @@ public class MainActivity extends AppCompatActivity
      * Iterate through mMoviesList and save the poster paths to the posters array.
      * Use posters array to populate recycler view.
      */
-    // TODO (1) fix API KEY STORAGE
     private void getTopRatedMovies() {
         Call<MovieList> call = service.getTopRatedMovies(BuildConfig.ApiKey);
         call.enqueue(new Callback<MovieList>() {
             @Override
             public void onResponse(Call<MovieList> call, Response<MovieList> response) {
+                if (response.isSuccessful()) {
+                    mMoviesList = response.body().getMovieArrayList();
 
-                mMoviesList = response.body().getMovieArrayList();
+                    String[] posters = new String[20];
 
-                String[] posters = new String[20];
+                    for (int i = 0; i < mMoviesList.size(); i++) {
+                        Movie movie = mMoviesList.get(i);
+                        String posterPath = movie.getPoster_path();
+                        posters[i] = "http://image.tmdb.org/t/p/w185/" + posterPath;
+                    }
 
-                for (int i = 0; i < mMoviesList.size(); i++) {
-                    Movie movie = mMoviesList.get(i);
-                    String posterPath = movie.getPoster_path();
-                    posters[i] = "http://image.tmdb.org/t/p/w185/" + posterPath;
+                    mMoviePosterAdapter.setMoviePosterUrls(posters);
+                } else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Toast.makeText(MainActivity.this, jObjError.getString("message"), Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
                 }
-
-                mMoviePosterAdapter.setMoviePosterUrls(posters);
             }
 
             @Override
