@@ -1,10 +1,10 @@
 The API key is stored in gradle.properties. gradle.properties must be created in the following location.
 
-Windows: C:\Users\<Your Username>\.gradle
+Windows: C:\Users\Your Username\.gradle
 
-Mac: /Users/<Your Username>/.gradle
+Mac: /Users/Your Username/.gradle
   
-Linux: /home/<Your Username>/.gradle 
+Linux: /home/Your Username/.gradle 
   
 Add the following line to gradle.properties:  
 ```
