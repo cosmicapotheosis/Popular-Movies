@@ -166,6 +166,8 @@ public class Movie implements Parcelable {
         this.release_date = release_date;
     }
 
+    // Parcelable stuff
+
     protected Movie(Parcel in) {
         vote_count = in.readInt();
         id = in.readInt();
