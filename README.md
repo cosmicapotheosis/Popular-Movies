@@ -11,8 +11,8 @@ Add the following line to gradle.properties:
 PopularMovies_ApiKey="yourapikeyfromthemoviedb"
 ```
 
-If the API key does not import correctly, modify line 12 of build.gradle (app module) to the following:
+If the API key does not import correctly, modify line 12 of build.gradle (app module) to the following: (be sure to include the quotes and backslashes in exactly the same way)
 
 ```
-buildConfigField 'String', "ApiKey", "whateveryourapikeyis"
+buildConfigField 'String', "ApiKey", "\"whateveryourapikeyis\""
 ```
