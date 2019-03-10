@@ -11,10 +11,10 @@ public class VideoList {
     @SerializedName("id")
     private int id;
 
-    public VideoList(int id, ArrayList<Video> videoList) {
-        this.videoList = videoList;
-        this.id = id;
-    }
+//    public VideoList(int id, ArrayList<Video> videoList) {
+//        this.videoList = videoList;
+//        this.id = id;
+//    }
 
     public ArrayList<Video> getVideoArrayList() {
         return videoList;

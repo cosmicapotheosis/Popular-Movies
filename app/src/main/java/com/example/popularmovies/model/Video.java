@@ -16,7 +16,7 @@ public class Video {
 //    }
 
     @SerializedName("id")
-    private int id;
+    private String id;
     @SerializedName("iso_639_1")
     private String iso_639_1;
     @SerializedName("iso_3166_1")
@@ -32,7 +32,7 @@ public class Video {
     @SerializedName("type")
     private String type;
 
-    public Video(int id, String iso_639_1, String iso_3166_1, String key,
+    public Video(String id, String iso_639_1, String iso_3166_1, String key,
                  String name, String site, int size, String type) {
         this.id = id;
         this.iso_639_1 = iso_639_1;
@@ -44,11 +44,11 @@ public class Video {
         this.type = type;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

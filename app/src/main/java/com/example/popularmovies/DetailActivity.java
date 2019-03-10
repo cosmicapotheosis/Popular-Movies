@@ -6,19 +6,35 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.popularmovies.model.Movie;
+import com.example.popularmovies.model.MovieList;
+import com.example.popularmovies.model.VideoList;
+import com.example.popularmovies.model.Video;
+import com.example.popularmovies.network.MovieService;
+import com.example.popularmovies.network.RetrofitClientInstance;
+import com.example.popularmovies.network.TrailerService;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DetailActivity extends AppCompatActivity {
 
     Movie mMovie;
+    private ArrayList<Video> mVideosList;
     // Use Butterknife to set views
     @BindView(R.id.count_tv) TextView mVoteCount;
     //TextView mId;
@@ -34,6 +50,8 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.overview_tv) TextView mOverview;
     @BindView(R.id.year_tv) TextView mReleaseDate;
     @BindView(R.id.trailer_link_tv) TextView mTrailerLink;
+
+    private TrailerService service;
 
     // TODO (1) Use Retrofit to return list of youtube links for movie.
     // Video and VideoList models
@@ -53,19 +71,55 @@ public class DetailActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        service = RetrofitClientInstance.getRetrofitInstance().create(TrailerService.class);
+
         Intent intentThatStartedThisActivity = getIntent();
         if (intentThatStartedThisActivity.hasExtra("Movie")) {
             mMovie = intentThatStartedThisActivity.getParcelableExtra("Movie");
             populateUI();
-            // Set click listener for trailer link
-            assert mTrailerLink != null;
-            mTrailerLink.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    watchYoutubeVideo(DetailActivity.this, "HsFjDou_4qk");
-                }
-            });
+            getVideosList();
         }
+    }
+
+    private void getVideosList() {
+        // API key stored in ~/.gradle/gradle.properties
+        // Movie id must be converted to string.
+        Call<VideoList> call = service.getTrailerVideos(String.valueOf(mMovie.getId()), BuildConfig.ApiKey);
+        call.enqueue(new Callback<VideoList>() {
+            @Override
+            public void onResponse(Call<VideoList> call, Response<VideoList> response) {
+                if (response.isSuccessful()) {
+                    // save the response as a list of movies
+                    mVideosList = response.body().getVideoArrayList();
+                    // do something
+//                    for (int i = 0; i < mVideosList.size(); i++) {
+//                        Video video = mVideosList.get(i);
+//                        Log.d("DetailActivity", video.getName());
+//                        Toast.makeText(DetailActivity.this, video.getName(), Toast.LENGTH_SHORT).show();
+//                    }
+                    // Set click listener for trailer link
+                    assert mTrailerLink != null;
+                    mTrailerLink.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            watchYoutubeVideo(DetailActivity.this, mVideosList.get(0).getKey());
+                        }
+                    });
+                } else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Toast.makeText(DetailActivity.this, jObjError.getString("message"), Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Toast.makeText(DetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<VideoList> call, Throwable t) {
+                Toast.makeText(DetailActivity.this, "Something went wrong... Please try later!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
