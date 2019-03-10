@@ -35,6 +35,13 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.year_tv) TextView mReleaseDate;
     @BindView(R.id.trailer_link_tv) TextView mTrailerLink;
 
+    // TODO (1) Use Retrofit to return list of youtube links for movie.
+    // Video and VideoList models
+    // TrailerService
+    // endpoint https://api.themoviedb.org/3/movie/324857/videos?api_key=8241740b7b3cbffc6476467a4bd4ed6f
+    // TODO (2) Use new recyclerview adapter to display results in a list. each list item has a play icon and title "Trailer 1" etc.
+    // very similar to how retrofit is used to populate the mainview with movie poster images
+
     /**
      * Check that a Movie object was passed as extra, then populate the UI based on that Movie data.
      * @param savedInstanceState
