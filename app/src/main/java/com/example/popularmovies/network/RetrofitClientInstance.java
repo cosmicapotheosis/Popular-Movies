@@ -1,4 +1,4 @@
-package com.example.popularmoviesstage1.network;
+package com.example.popularmovies.network;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

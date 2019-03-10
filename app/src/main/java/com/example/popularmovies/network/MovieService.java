@@ -1,13 +1,9 @@
-package com.example.popularmoviesstage1.network;
+package com.example.popularmovies.network;
 
-import com.example.popularmoviesstage1.model.Movie;
-import com.example.popularmoviesstage1.model.MovieList;
-
-import java.util.List;
+import com.example.popularmovies.model.MovieList;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface MovieService {

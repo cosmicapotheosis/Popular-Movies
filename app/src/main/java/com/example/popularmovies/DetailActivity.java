@@ -1,15 +1,17 @@
-package com.example.popularmoviesstage1;
+package com.example.popularmovies;
 
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.popularmoviesstage1.model.Movie;
+import com.example.popularmovies.model.Movie;
 import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,6 +33,7 @@ public class DetailActivity extends AppCompatActivity {
     //TextView mAdult;
     @BindView(R.id.overview_tv) TextView mOverview;
     @BindView(R.id.year_tv) TextView mReleaseDate;
+    @BindView(R.id.trailer_link_tv) TextView mTrailerLink;
 
     /**
      * Check that a Movie object was passed as extra, then populate the UI based on that Movie data.
@@ -47,6 +50,30 @@ public class DetailActivity extends AppCompatActivity {
         if (intentThatStartedThisActivity.hasExtra("Movie")) {
             mMovie = intentThatStartedThisActivity.getParcelableExtra("Movie");
             populateUI();
+            // Set click listener for trailer link
+            assert mTrailerLink != null;
+            mTrailerLink.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    watchYoutubeVideo(DetailActivity.this, "HsFjDou_4qk");
+                }
+            });
+        }
+    }
+
+    /**
+     * Method to launch a Youtube video
+     * @param context
+     * @param id
+     */
+    public static void watchYoutubeVideo(Context context, String id){
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.youtube.com/watch?v=" + id));
+        try {
+            context.startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            context.startActivity(webIntent);
         }
     }
 
@@ -71,5 +98,6 @@ public class DetailActivity extends AppCompatActivity {
         mOverview.setText(mMovie.getOverview());
         mPopularity.setText(Float.toString(mMovie.getPopularity()));
         mVoteCount.setText("Out of " + mMovie.getVote_count() + " votes");
+        mTrailerLink.setText("Watch Trailer");
     }
 }

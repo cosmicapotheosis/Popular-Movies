@@ -1,4 +1,4 @@
-package com.example.popularmoviesstage1;
+package com.example.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,10 +10,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.example.popularmoviesstage1.model.Movie;
-import com.example.popularmoviesstage1.model.MovieList;
-import com.example.popularmoviesstage1.network.MovieService;
-import com.example.popularmoviesstage1.network.RetrofitClientInstance;
+import com.example.popularmovies.model.Movie;
+import com.example.popularmovies.model.MovieList;
+import com.example.popularmovies.network.MovieService;
+import com.example.popularmovies.network.RetrofitClientInstance;
 
 import org.json.JSONObject;
 
