@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,10 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.popularmovies.model.Movie;
-import com.example.popularmovies.model.MovieList;
 import com.example.popularmovies.model.VideoList;
 import com.example.popularmovies.model.Video;
-import com.example.popularmovies.network.MovieService;
 import com.example.popularmovies.network.RetrofitClientInstance;
 import com.example.popularmovies.network.TrailerService;
 import com.squareup.picasso.Picasso;
@@ -31,27 +31,24 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity
+    implements MovieTrailerAdapter.ListItemClickListener {
 
-    Movie mMovie;
-    private ArrayList<Video> mVideosList;
     // Use Butterknife to set views
     @BindView(R.id.count_tv) TextView mVoteCount;
-    //TextView mId;
-    //TextView mVideo;
     @BindView(R.id.rating_tv) TextView mVoteAverage;
     @BindView(R.id.pop_tv) TextView mPopularity;
     @BindView(R.id.poster_iv) ImageView mPoster;
-    //TextView mOriginalLanguage;
-    //TextView mOriginalTitle;
-    //TextView mGenreIds;
-    //ImageView mBackdrop;
-    //TextView mAdult;
     @BindView(R.id.overview_tv) TextView mOverview;
     @BindView(R.id.year_tv) TextView mReleaseDate;
-    @BindView(R.id.trailer_link_tv) TextView mTrailerLink;
+    //@BindView(R.id.trailer_link_tv) TextView mTrailerLink;
 
     private TrailerService service;
+    private Movie mMovie;
+    private ArrayList<Video> mVideosList = new ArrayList<Video>();
+
+    @BindView(R.id.recyclerview_trailers) RecyclerView mRecyclerView;
+    private MovieTrailerAdapter mMovieTrailerAdapter;
 
     // TODO (1) Use Retrofit to return list of youtube links for movie.
     // Video and VideoList models
@@ -75,12 +72,23 @@ public class DetailActivity extends AppCompatActivity {
 
         Intent intentThatStartedThisActivity = getIntent();
         if (intentThatStartedThisActivity.hasExtra("Movie")) {
+            // save movie info to member variable
             mMovie = intentThatStartedThisActivity.getParcelableExtra("Movie");
+            // Only if VideosList is empty do we make an API call
+            // There may be videos with no Trailers to list, this doesn't account for that
+            if (mVideosList.size() == 0) {
+                getVideosList();
+            }
+            // use movie info to populate UI
             populateUI();
-            getVideosList();
+
         }
     }
 
+    /**
+     * Makes API call to themoviedb using the ID of the movie to retrieve a list of Video objects
+     * and save them to the mVideosList variable if they are of the "Trailer" type
+     */
     private void getVideosList() {
         // API key stored in ~/.gradle/gradle.properties
         // Movie id must be converted to string.
@@ -89,22 +97,22 @@ public class DetailActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<VideoList> call, Response<VideoList> response) {
                 if (response.isSuccessful()) {
-                    // save the response as a list of movies
-                    mVideosList = response.body().getVideoArrayList();
-                    // do something
-//                    for (int i = 0; i < mVideosList.size(); i++) {
-//                        Video video = mVideosList.get(i);
-//                        Log.d("DetailActivity", video.getName());
-//                        Toast.makeText(DetailActivity.this, video.getName(), Toast.LENGTH_SHORT).show();
-//                    }
-                    // Set click listener for trailer link
-                    assert mTrailerLink != null;
-                    mTrailerLink.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            watchYoutubeVideo(DetailActivity.this, mVideosList.get(0).getKey());
+
+                    // iterate through response and save only the trailers to the VideosList
+                    ArrayList<Video> responseVideos = response.body().getVideoArrayList();
+                    for (Video vid : responseVideos) {
+                        if (vid.getType().equals("Trailer")) {
+                            mVideosList.add(vid);
                         }
-                    });
+                    }
+
+                    // set up trailers recycler view, will probably movie this somewhere better
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(DetailActivity.this);
+                    mRecyclerView.setLayoutManager(layoutManager);
+                    mRecyclerView.setHasFixedSize(true);
+                    mMovieTrailerAdapter = new MovieTrailerAdapter(mVideosList.size(), DetailActivity.this);
+                    mRecyclerView.setAdapter(mMovieTrailerAdapter);
+
                 } else {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -159,6 +167,12 @@ public class DetailActivity extends AppCompatActivity {
         mOverview.setText(mMovie.getOverview());
         mPopularity.setText(Float.toString(mMovie.getPopularity()));
         mVoteCount.setText("Out of " + mMovie.getVote_count() + " votes");
-        mTrailerLink.setText("Watch Trailer");
+        //mTrailerLink.setText("Watch Trailer");
+    }
+
+    @Override
+    public void onListItemClick(int clickedItemIndex) {
+        String videoKey = mVideosList.get(clickedItemIndex).getKey();
+        watchYoutubeVideo(DetailActivity.this, videoKey);
     }
 }
