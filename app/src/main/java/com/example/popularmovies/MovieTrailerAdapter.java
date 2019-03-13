@@ -73,7 +73,7 @@ public class MovieTrailerAdapter extends
         // Use picasso to set the image view in the view holder
         Picasso.get()
                 .load(R.drawable.playicon)
-                .fit()
+                .resize(120,120)
                 .into(holder.mPlayImageView);
     }
 
