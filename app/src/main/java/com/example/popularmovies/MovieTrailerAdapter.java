@@ -6,7 +6,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 
 public class MovieTrailerAdapter extends
@@ -67,6 +70,11 @@ public class MovieTrailerAdapter extends
     @Override
     public void onBindViewHolder(MovieTrailerAdapterViewHolder holder, int position) {
         holder.mTrailerTextView.setText("Trailer " + String.valueOf(position + 1));
+        // Use picasso to set the image view in the view holder
+        Picasso.get()
+                .load(R.drawable.playicon)
+                .fit()
+                .into(holder.mPlayImageView);
     }
 
     /**
@@ -84,11 +92,13 @@ public class MovieTrailerAdapter extends
             implements View.OnClickListener {
 
         public final TextView mTrailerTextView;
+        public final ImageView mPlayImageView;
 
 
         public MovieTrailerAdapterViewHolder(View view) {
             super(view);
             mTrailerTextView = (TextView) view.findViewById(R.id.trailer_title_tv);
+            mPlayImageView = (ImageView) view.findViewById(R.id.play_icon_iv);
             view.setOnClickListener(this);
         }
 
