@@ -55,7 +55,7 @@ public class Review {
         this.url = url;
     }
 
-    public String getContent() { return author; }
+    public String getContent() { return content; }
 
     public void setContent(String content) {
         this.content = content;

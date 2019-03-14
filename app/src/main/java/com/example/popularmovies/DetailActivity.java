@@ -34,7 +34,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DetailActivity extends AppCompatActivity
-    implements MovieTrailerAdapter.ListItemClickListener {
+    implements MovieTrailerAdapter.ListItemClickListener,
+        MovieReviewAdapter.ListItemClickListener {
 
     // Use Butterknife to set views
     @BindView(R.id.count_tv) TextView mVoteCount;
@@ -52,8 +53,11 @@ public class DetailActivity extends AppCompatActivity
     private ArrayList<Video> mVideosList = new ArrayList<Video>();
     private ArrayList<Review> mReviewsList = new ArrayList<Review>();
 
-    @BindView(R.id.recyclerview_trailers) RecyclerView mRecyclerView;
+    @BindView(R.id.recyclerview_trailers) RecyclerView mRecyclerViewTrailers;
     private MovieTrailerAdapter mMovieTrailerAdapter;
+
+    @BindView(R.id.recyclerview_reviews) RecyclerView mRecyclerViewReviews;
+    private MovieReviewAdapter mMovieReviewAdapter;
 
     // TODO (1) Use Retrofit to return list of reviews for movie.
     // Review and ReviewList models
@@ -108,12 +112,21 @@ public class DetailActivity extends AppCompatActivity
                 getReviewsList();
             }
             // set up trailers recycler view
-            LinearLayoutManager layoutManager = new LinearLayoutManager(DetailActivity.this);
-            mRecyclerView.setLayoutManager(layoutManager);
-            mRecyclerView.setHasFixedSize(true);
+            LinearLayoutManager layoutManagerTrailers = new LinearLayoutManager(DetailActivity.this);
+            mRecyclerViewTrailers.setLayoutManager(layoutManagerTrailers);
+            mRecyclerViewTrailers.setHasFixedSize(true);
+            mRecyclerViewTrailers.setNestedScrollingEnabled(false);
             // initial filler adapter
             mMovieTrailerAdapter = new MovieTrailerAdapter(0, DetailActivity.this);
-            mRecyclerView.setAdapter(mMovieTrailerAdapter);
+            mRecyclerViewTrailers.setAdapter(mMovieTrailerAdapter);
+            // set up reviews recycler view
+            LinearLayoutManager layoutManagerReviews = new LinearLayoutManager(DetailActivity.this);
+            mRecyclerViewReviews.setLayoutManager(layoutManagerReviews);
+            //mRecyclerViewReviews.setHasFixedSize(true);
+            mRecyclerViewReviews.setNestedScrollingEnabled(false);
+            // initial filler adapter
+            mMovieReviewAdapter = new MovieReviewAdapter(mReviewsList);
+            mRecyclerViewReviews.setAdapter(mMovieReviewAdapter);
             // use movie info to populate UI
             populateUI();
         }
@@ -133,18 +146,16 @@ public class DetailActivity extends AppCompatActivity
                 if (response.isSuccessful()) {
 
                     // iterate through response
-                    ArrayList<Review> responseReviews = response.body().getResults();
+                    mReviewsList = response.body().getResults();
 
-                    for (Review r : responseReviews) {
-                      Log.d("logged", "review author: " + r.getAuthor());
+                    // Update reviews recyclerview
+                    mMovieReviewAdapter = new MovieReviewAdapter(mReviewsList);
+                    mRecyclerViewReviews.setAdapter(mMovieReviewAdapter);
+
+                    for (Review r : mReviewsList) {
+                        Log.d("Reviews", "Review Author: " + r.getAuthor());
+                        Log.d("Reviews", "Review Content: " + r.getContent());
                     }
-
-//                    // set up trailers recycler view, will probably movie this somewhere better
-//                    LinearLayoutManager layoutManager = new LinearLayoutManager(DetailActivity.this);
-//                    mRecyclerView.setLayoutManager(layoutManager);
-//                    mRecyclerView.setHasFixedSize(true);
-//                    mMovieTrailerAdapter = new MovieTrailerAdapter(mVideosList.size(), DetailActivity.this);
-//                    mRecyclerView.setAdapter(mMovieTrailerAdapter);
 
                 } else {
                     try {
@@ -185,7 +196,7 @@ public class DetailActivity extends AppCompatActivity
                     }
 
                     mMovieTrailerAdapter = new MovieTrailerAdapter(mVideosList.size(), DetailActivity.this);
-                    mRecyclerView.setAdapter(mMovieTrailerAdapter);
+                    mRecyclerViewTrailers.setAdapter(mMovieTrailerAdapter);
 
                 } else {
                     try {
