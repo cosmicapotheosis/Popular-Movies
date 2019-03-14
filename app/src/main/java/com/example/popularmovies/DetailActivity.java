@@ -103,11 +103,19 @@ public class DetailActivity extends AppCompatActivity
             // There may be videos with no Trailers to list, this doesn't account for that
             if (mVideosList.size() == 0) {
                 getVideosList();
+            }
+            if (mReviewsList.size() == 0) {
                 getReviewsList();
             }
+            // set up trailers recycler view
+            LinearLayoutManager layoutManager = new LinearLayoutManager(DetailActivity.this);
+            mRecyclerView.setLayoutManager(layoutManager);
+            mRecyclerView.setHasFixedSize(true);
+            // initial filler adapter
+            mMovieTrailerAdapter = new MovieTrailerAdapter(0, DetailActivity.this);
+            mRecyclerView.setAdapter(mMovieTrailerAdapter);
             // use movie info to populate UI
             populateUI();
-
         }
     }
 
@@ -176,10 +184,6 @@ public class DetailActivity extends AppCompatActivity
                         }
                     }
 
-                    // set up trailers recycler view, will probably movie this somewhere better
-                    LinearLayoutManager layoutManager = new LinearLayoutManager(DetailActivity.this);
-                    mRecyclerView.setLayoutManager(layoutManager);
-                    mRecyclerView.setHasFixedSize(true);
                     mMovieTrailerAdapter = new MovieTrailerAdapter(mVideosList.size(), DetailActivity.this);
                     mRecyclerView.setAdapter(mMovieTrailerAdapter);
 
