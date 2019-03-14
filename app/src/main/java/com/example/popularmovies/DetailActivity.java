@@ -9,15 +9,17 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.popularmovies.model.Movie;
+import com.example.popularmovies.model.Review;
+import com.example.popularmovies.model.ReviewList;
 import com.example.popularmovies.model.VideoList;
 import com.example.popularmovies.model.Video;
 import com.example.popularmovies.network.RetrofitClientInstance;
+import com.example.popularmovies.network.ReviewService;
 import com.example.popularmovies.network.TrailerService;
 import com.squareup.picasso.Picasso;
 
@@ -43,9 +45,12 @@ public class DetailActivity extends AppCompatActivity
     @BindView(R.id.year_tv) TextView mReleaseDate;
     //@BindView(R.id.trailer_link_tv) TextView mTrailerLink;
 
-    private TrailerService service;
+    private TrailerService trailerService;
+    private ReviewService reviewService;
+
     private Movie mMovie;
     private ArrayList<Video> mVideosList = new ArrayList<Video>();
+    private ArrayList<Review> mReviewsList = new ArrayList<Review>();
 
     @BindView(R.id.recyclerview_trailers) RecyclerView mRecyclerView;
     private MovieTrailerAdapter mMovieTrailerAdapter;
@@ -87,7 +92,8 @@ public class DetailActivity extends AppCompatActivity
 
         ButterKnife.bind(this);
 
-        service = RetrofitClientInstance.getRetrofitInstance().create(TrailerService.class);
+        trailerService = RetrofitClientInstance.getRetrofitInstance().create(TrailerService.class);
+        reviewService = RetrofitClientInstance.getRetrofitInstance().create(ReviewService.class);
 
         Intent intentThatStartedThisActivity = getIntent();
         if (intentThatStartedThisActivity.hasExtra("Movie")) {
@@ -97,11 +103,56 @@ public class DetailActivity extends AppCompatActivity
             // There may be videos with no Trailers to list, this doesn't account for that
             if (mVideosList.size() == 0) {
                 getVideosList();
+                getReviewsList();
             }
             // use movie info to populate UI
             populateUI();
 
         }
+    }
+
+    /**
+     * Makes API call to themoviedb using the ID of the movie to retrieve a list of Review objects
+     * and save them to the mReviewsList variable
+     */
+    private void getReviewsList() {
+        // API key stored in ~/.gradle/gradle.properties
+        // Movie id must be converted to string.
+        Call<ReviewList> call = reviewService.getReviews(String.valueOf(mMovie.getId()), BuildConfig.ApiKey);
+        call.enqueue(new Callback<ReviewList>() {
+            @Override
+            public void onResponse(Call<ReviewList> call, Response<ReviewList> response) {
+                if (response.isSuccessful()) {
+
+                    // iterate through response
+                    ArrayList<Review> responseReviews = response.body().getResults();
+
+                    for (Review r : responseReviews) {
+                      Log.d("logged", "review author: " + r.getAuthor());
+                    }
+
+//                    // set up trailers recycler view, will probably movie this somewhere better
+//                    LinearLayoutManager layoutManager = new LinearLayoutManager(DetailActivity.this);
+//                    mRecyclerView.setLayoutManager(layoutManager);
+//                    mRecyclerView.setHasFixedSize(true);
+//                    mMovieTrailerAdapter = new MovieTrailerAdapter(mVideosList.size(), DetailActivity.this);
+//                    mRecyclerView.setAdapter(mMovieTrailerAdapter);
+
+                } else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Toast.makeText(DetailActivity.this, jObjError.getString("message"), Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Toast.makeText(DetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReviewList> call, Throwable t) {
+                Toast.makeText(DetailActivity.this, "Something went wrong... Please try later!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
@@ -111,7 +162,7 @@ public class DetailActivity extends AppCompatActivity
     private void getVideosList() {
         // API key stored in ~/.gradle/gradle.properties
         // Movie id must be converted to string.
-        Call<VideoList> call = service.getTrailerVideos(String.valueOf(mMovie.getId()), BuildConfig.ApiKey);
+        Call<VideoList> call = trailerService.getTrailerVideos(String.valueOf(mMovie.getId()), BuildConfig.ApiKey);
         call.enqueue(new Callback<VideoList>() {
             @Override
             public void onResponse(Call<VideoList> call, Response<VideoList> response) {

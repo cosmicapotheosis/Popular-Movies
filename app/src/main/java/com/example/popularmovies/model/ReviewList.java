@@ -77,4 +77,5 @@ public class ReviewList {
     public void setResults(ArrayList<Review> results) {
         this.results = results;
     }
+
 }
