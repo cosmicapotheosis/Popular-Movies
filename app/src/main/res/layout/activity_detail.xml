@@ -103,7 +103,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="24dp"
+                android:paddingTop="24dp"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp"
                 android:textStyle="bold"
                 android:textSize="24dp"
                 android:text="Reviews"
@@ -112,7 +114,8 @@
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recyclerview_reviews"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:padding="24dp" />
 
         </LinearLayout>
 
