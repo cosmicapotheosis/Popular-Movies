@@ -58,6 +58,17 @@ public class Movie implements Parcelable {
         this.release_date = release_date;
     }
 
+    /**
+     * Overridden so that we can use list.contains() with this object type
+     * @param obj
+     * @return
+     */
+    @Override
+    public boolean equals(Object obj) {
+        // This is a temporary, id should be changed from int to Integer
+        return String.valueOf(this.id).equals(String.valueOf(((Movie) obj).id));
+    }
+
     public int getVote_count() {
         return vote_count;
     }

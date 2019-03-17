@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +29,7 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,6 +49,7 @@ public class DetailActivity extends AppCompatActivity
     @BindView(R.id.overview_tv) TextView mOverview;
     @BindView(R.id.year_tv) TextView mReleaseDate;
     //@BindView(R.id.trailer_link_tv) TextView mTrailerLink;
+    @BindView(R.id.favorite_button) Button mFavoriteButton;
 
     private TrailerService trailerService;
     private ReviewService reviewService;
@@ -108,18 +111,42 @@ public class DetailActivity extends AppCompatActivity
             mRecyclerViewReviews.setAdapter(mMovieReviewAdapter);
             // use movie info to populate UI
             populateUI();
-
+            // set db instance
             mDb = AppDatabase.getInstance(getApplicationContext());
         }
     }
 
     /**
-     * Called when the user touches the "MARK AS FAVORITE"  button
+     * This method is called after this activity has been paused or restarted.
      */
-    public void addFavorite(View view) {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        List<Movie> favs = mDb.movieDao().loadAllMovies();
+        // Set the text on the button to reflect whether or not this movie is saved to favs
+        if (favs.contains(mMovie)) {
+            mFavoriteButton.setText("DELETE FROM FAVORITES");
+        } else {
+            mFavoriteButton.setText("MARK AS FAVORITE");
+        }
+    }
+
+    /**
+     * Called when the user touches the "MARK AS FAVORITE" or "DELETE FROM FAVORITES"  button
+     */
+    public void clickFavorite(View view) {
         // Do something in response to button click
-        Toast.makeText(DetailActivity.this, "Movie added to favorites!", Toast.LENGTH_SHORT).show();
-        mDb.movieDao().insertMovie(mMovie);
+        List<Movie> favs = mDb.movieDao().loadAllMovies();
+        // Either delete or add movie depending on whether or not its in the db
+        if (favs.contains(mMovie)) {
+            Toast.makeText(DetailActivity.this, "Movie deleted from favorites!", Toast.LENGTH_SHORT).show();
+            mDb.movieDao().deleteMovie(mMovie);
+        } else {
+            Toast.makeText(DetailActivity.this, "Movie added to favorites!", Toast.LENGTH_SHORT).show();
+            mDb.movieDao().insertMovie(mMovie);
+        }
+        // Navigate back to main activity
+        this.finish();
     }
 
     /**

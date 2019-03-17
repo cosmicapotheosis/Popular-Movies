@@ -73,8 +73,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/favorite_button"
-                        android:onClick="addFavorite"
-                        android:text="MARK AS FAVORITE" />
+                        android:onClick="clickFavorite" />
 
                 </LinearLayout>
 

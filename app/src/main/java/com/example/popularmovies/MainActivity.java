@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity
         service = RetrofitClientInstance.getRetrofitInstance().create(MovieService.class);
         // To begin with, sort movies by popular
         getPopularMovies();
-
+        // set db instance
         mDb = AppDatabase.getInstance(getApplicationContext());
     }
 
@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         List<Movie> movies = mDb.movieDao().loadAllMovies();
         Log.d("db", "Length of favorites db: " + movies.size());
+        Log.d("db", "First movie name: " + movies.get(0).getTitle());
     }
 
     /**
