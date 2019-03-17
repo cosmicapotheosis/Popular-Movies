@@ -1,9 +1,12 @@
 package com.example.popularmovies;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -40,6 +43,9 @@ import retrofit2.Response;
 public class DetailActivity extends AppCompatActivity
     implements MovieTrailerAdapter.ListItemClickListener,
         MovieReviewAdapter.ListItemClickListener {
+
+    // Constant for logging
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     // Use Butterknife to set views
     @BindView(R.id.count_tv) TextView mVoteCount;
@@ -114,20 +120,19 @@ public class DetailActivity extends AppCompatActivity
             populateUI();
             // set db instance
             mDb = AppDatabase.getInstance(getApplicationContext());
+
+            retrieveFavorites();
         }
     }
 
-    /**
-     * This method is called after this activity has been paused or restarted.
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+    private void retrieveFavorites() {
+        Log.d(TAG, "Actively retrieving the favorites from the DataBase");
+        LiveData<List<Movie>> movies = mDb.movieDao().loadAllMovies();
+        movies.observe(this, new Observer<List<Movie>>() {
             @Override
-            public void run() {
-                mFavorites = mDb.movieDao().loadAllMovies();
-                // Set the text on the button to reflect whether or not this movie is saved to favs
+            public void onChanged(@Nullable List<Movie> movies) {
+                mFavorites = movies;
+                Log.d(TAG, "Receiving database update from LiveData");
                 if (mFavorites.contains(mMovie)) {
                     mFavoriteButton.setText("DELETE FROM FAVORITES");
                 } else {
@@ -135,12 +140,12 @@ public class DetailActivity extends AppCompatActivity
                 }
             }
         });
-
     }
 
     /**
      * Called when the user touches the "MARK AS FAVORITE" or "DELETE FROM FAVORITES"  button
      */
+    // THIS ISNT WORKING RIGHT NOW
     public void clickFavorite(View view) {
         // Do something in response to button click
         // Either delete or add movie depending on whether or not its in the db

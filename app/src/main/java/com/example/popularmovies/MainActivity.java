@@ -1,7 +1,10 @@
 package com.example.popularmovies;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -30,6 +33,9 @@ import retrofit2.Callback;
 
 public class MainActivity extends AppCompatActivity
         implements MoviePosterAdapter.ListItemClickListener {
+
+    // Constant for logging
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     @BindView(R.id.recyclerview_posters) RecyclerView mRecyclerView;
 
@@ -61,23 +67,19 @@ public class MainActivity extends AppCompatActivity
         getPopularMovies();
         // set db instance
         mDb = AppDatabase.getInstance(getApplicationContext());
+
+        retrieveFavorites();
     }
 
-    /**
-     * This method is called after this activity has been paused or restarted.
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+    private void retrieveFavorites() {
+        Log.d(TAG, "Actively retrieving the favorites from the DataBase");
+        LiveData<List<Movie>> movies = mDb.movieDao().loadAllMovies();
+        movies.observe(this, new Observer<List<Movie>>() {
             @Override
-            public void run() {
-                final List<Movie> movies = mDb.movieDao().loadAllMovies();
-                Log.d("db", "Length of favorites db: " + movies.size());
-                Log.d("db", "First movie name: " + movies.get(0).getTitle());
+            public void onChanged(@Nullable List<Movie> movies) {
+                Log.d(TAG, "Receiving database update from LiveData");
             }
         });
-
     }
 
     /**
