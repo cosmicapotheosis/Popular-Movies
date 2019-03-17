@@ -1,14 +1,18 @@
 package com.example.popularmovies.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+@Entity(tableName = "movies")
 public class Movie implements Parcelable {
 
     @SerializedName("vote_count")
     private int vote_count;
+    @PrimaryKey
     @SerializedName("id")
     private int id;
     @SerializedName("video")
@@ -25,8 +29,9 @@ public class Movie implements Parcelable {
     private String original_language;
     @SerializedName("original_title")
     private String original_title;
-    @SerializedName("genre_ids")
-    private int[] genre_ids;
+    // Intentionally omit genre_ids since we don't use it and it complicates Room implementation
+//    @SerializedName("genre_ids")
+//    private int[] genre_ids;
     @SerializedName("backdrop_path")
     private String backdrop_path;
     @SerializedName("adult")
@@ -37,7 +42,7 @@ public class Movie implements Parcelable {
     private String release_date;
 
     public Movie(int vote_count, int id, boolean video, float vote_average, String title, float popularity, String poster_path,
-                 String original_language, String original_title, int[] genre_ids, String backdrop_path, boolean adult, String overview, String release_date) {
+                 String original_language, String original_title, String backdrop_path, boolean adult, String overview, String release_date) {
         this.vote_count = vote_count;
         this.id = id;
         this.video = video;
@@ -47,7 +52,6 @@ public class Movie implements Parcelable {
         this.poster_path = poster_path;
         this.original_language = original_language;
         this.original_title = original_title;
-        this.genre_ids = genre_ids;
         this.backdrop_path = backdrop_path;
         this.adult = adult;
         this.overview = overview;
@@ -126,14 +130,6 @@ public class Movie implements Parcelable {
         this.original_title = original_title;
     }
 
-    public int[] getGenre_ids() {
-        return genre_ids;
-    }
-
-    public void setGenre_ids(int[] genre_ids) {
-        this.genre_ids = genre_ids;
-    }
-
     public String getBackdrop_path() {
         return backdrop_path;
     }
@@ -179,7 +175,6 @@ public class Movie implements Parcelable {
         poster_path = in.readString();
         original_language = in.readString();
         original_title = in.readString();
-        genre_ids = in.createIntArray();
         backdrop_path = in.readString();
         adult = in.readByte() != 0;
         overview = in.readString();
@@ -215,7 +210,6 @@ public class Movie implements Parcelable {
         parcel.writeString(poster_path);
         parcel.writeString(original_language);
         parcel.writeString(original_title);
-        parcel.writeIntArray(genre_ids);
         parcel.writeString(backdrop_path);
         parcel.writeByte((byte) (adult ? 1 : 0));
         parcel.writeString(overview);

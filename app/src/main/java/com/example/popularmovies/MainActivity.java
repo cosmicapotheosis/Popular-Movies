@@ -6,10 +6,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.popularmovies.database.AppDatabase;
 import com.example.popularmovies.model.Movie;
 import com.example.popularmovies.model.MovieList;
 import com.example.popularmovies.network.MovieService;
@@ -18,6 +20,7 @@ import com.example.popularmovies.network.RetrofitClientInstance;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,6 +38,8 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<Movie> mMoviesList;
 
     private MovieService service;
+
+    private AppDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +59,18 @@ public class MainActivity extends AppCompatActivity
         service = RetrofitClientInstance.getRetrofitInstance().create(MovieService.class);
         // To begin with, sort movies by popular
         getPopularMovies();
+
+        mDb = AppDatabase.getInstance(getApplicationContext());
+    }
+
+    /**
+     * This method is called after this activity has been paused or restarted.
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        List<Movie> movies = mDb.movieDao().loadAllMovies();
+        Log.d("db", "Length of favorites db: " + movies.size());
     }
 
     /**
