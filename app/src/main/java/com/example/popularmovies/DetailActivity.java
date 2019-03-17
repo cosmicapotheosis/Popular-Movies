@@ -66,6 +66,7 @@ public class DetailActivity extends AppCompatActivity
 
     // Member variable for the Database
     private AppDatabase mDb;
+    private List<Movie> mFavorites;
 
     /**
      * Check that a Movie object was passed as extra, then populate the UI based on that Movie data.
@@ -122,13 +123,19 @@ public class DetailActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        List<Movie> favs = mDb.movieDao().loadAllMovies();
-        // Set the text on the button to reflect whether or not this movie is saved to favs
-        if (favs.contains(mMovie)) {
-            mFavoriteButton.setText("DELETE FROM FAVORITES");
-        } else {
-            mFavoriteButton.setText("MARK AS FAVORITE");
-        }
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mFavorites = mDb.movieDao().loadAllMovies();
+                // Set the text on the button to reflect whether or not this movie is saved to favs
+                if (mFavorites.contains(mMovie)) {
+                    mFavoriteButton.setText("DELETE FROM FAVORITES");
+                } else {
+                    mFavoriteButton.setText("MARK AS FAVORITE");
+                }
+            }
+        });
+
     }
 
     /**
@@ -136,14 +143,23 @@ public class DetailActivity extends AppCompatActivity
      */
     public void clickFavorite(View view) {
         // Do something in response to button click
-        List<Movie> favs = mDb.movieDao().loadAllMovies();
         // Either delete or add movie depending on whether or not its in the db
-        if (favs.contains(mMovie)) {
+        if (mFavorites.contains(mMovie)) {
             Toast.makeText(DetailActivity.this, "Movie deleted from favorites!", Toast.LENGTH_SHORT).show();
-            mDb.movieDao().deleteMovie(mMovie);
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    mDb.movieDao().deleteMovie(mMovie);
+                }
+            });
         } else {
             Toast.makeText(DetailActivity.this, "Movie added to favorites!", Toast.LENGTH_SHORT).show();
-            mDb.movieDao().insertMovie(mMovie);
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    mDb.movieDao().insertMovie(mMovie);
+                }
+            });
         }
         // Navigate back to main activity
         this.finish();
