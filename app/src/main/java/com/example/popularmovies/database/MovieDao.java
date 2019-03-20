@@ -18,6 +18,9 @@ public interface MovieDao {
     @Query("SELECT * FROM movies ORDER BY popularity")
     LiveData<List<Movie>> loadAllMovies();
 
+    @Query("SELECT * FROM movies ORDER BY popularity")
+    List<Movie> loadAllMoviesNoLiveData();
+
     @Insert
     void insertMovie(Movie movie);
 

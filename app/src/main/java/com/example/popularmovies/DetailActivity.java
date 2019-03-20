@@ -2,6 +2,7 @@ package com.example.popularmovies;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -126,13 +127,12 @@ public class DetailActivity extends AppCompatActivity
     }
 
     private void retrieveFavorites() {
-        Log.d(TAG, "Actively retrieving the favorites from the DataBase");
-        LiveData<List<Movie>> movies = mDb.movieDao().loadAllMovies();
-        movies.observe(this, new Observer<List<Movie>>() {
+        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel.getFavorites().observe(this, new Observer<List<Movie>>() {
             @Override
             public void onChanged(@Nullable List<Movie> movies) {
                 mFavorites = movies;
-                Log.d(TAG, "Receiving database update from LiveData");
+                Log.d(TAG, "Receiving database update from LiveData in ViewModel");
                 if (mFavorites.contains(mMovie)) {
                     mFavoriteButton.setText("DELETE FROM FAVORITES");
                 } else {
@@ -145,7 +145,6 @@ public class DetailActivity extends AppCompatActivity
     /**
      * Called when the user touches the "MARK AS FAVORITE" or "DELETE FROM FAVORITES"  button
      */
-    // THIS ISNT WORKING RIGHT NOW
     public void clickFavorite(View view) {
         // Do something in response to button click
         // Either delete or add movie depending on whether or not its in the db
@@ -167,7 +166,7 @@ public class DetailActivity extends AppCompatActivity
             });
         }
         // Navigate back to main activity
-        this.finish();
+        //this.finish();
     }
 
     /**

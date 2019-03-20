@@ -2,6 +2,7 @@ package com.example.popularmovies;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
@@ -47,6 +48,10 @@ public class MainActivity extends AppCompatActivity
 
     private AppDatabase mDb;
 
+    // flag to keep track of whether or not we are viewing favorites
+    private Boolean showFavorites = false;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,16 +73,26 @@ public class MainActivity extends AppCompatActivity
         // set db instance
         mDb = AppDatabase.getInstance(getApplicationContext());
 
-        retrieveFavorites();
     }
 
-    private void retrieveFavorites() {
-        Log.d(TAG, "Actively retrieving the favorites from the DataBase");
-        LiveData<List<Movie>> movies = mDb.movieDao().loadAllMovies();
-        movies.observe(this, new Observer<List<Movie>>() {
+    /**
+     * Retrieve list of favorites from db and display them if showFavorites flag is set to true
+     */
+    private void getFavoriteMovies() {
+        // View model implementation
+        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel.getFavorites().observe(this, new Observer<List<Movie>>() {
             @Override
             public void onChanged(@Nullable List<Movie> movies) {
-                Log.d(TAG, "Receiving database update from LiveData");
+                if (showFavorites) {
+                    // Only if view is set to display favorites should we update the adapter to hold the favorites
+                    mMoviesList = new ArrayList<Movie>(movies);
+                    Log.d(TAG, "Receiving database update from LiveData in ViewModel");
+                    // only display 20 posters
+                    String[] posters = getPosters(mMoviesList);
+
+                    mMoviePosterAdapter.setMoviePosterUrls(posters);
+                }
             }
         });
     }
@@ -116,6 +131,7 @@ public class MainActivity extends AppCompatActivity
             Context context = MainActivity.this;
             String textToShow = "Sorting movies by popularity...";
             Toast.makeText(context, textToShow, Toast.LENGTH_SHORT).show();
+            showFavorites = false;
             getPopularMovies();
             return true;
         } else if (itemThatWasClickedId == R.id.sort_by_rating) {
@@ -123,7 +139,16 @@ public class MainActivity extends AppCompatActivity
             Context context = MainActivity.this;
             String textToShow = "Sorting movies by rating...";
             Toast.makeText(context, textToShow, Toast.LENGTH_SHORT).show();
+            showFavorites = false;
             getTopRatedMovies();
+            return true;
+        } else if (itemThatWasClickedId == R.id.list_favorites) {
+            Context context = MainActivity.this;
+            String textToShow = "Showing favorite movies...";
+            Toast.makeText(context, textToShow, Toast.LENGTH_SHORT).show();
+            // Allow adapter to be set with favorites
+            showFavorites = true;
+            getFavoriteMovies();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -144,13 +169,7 @@ public class MainActivity extends AppCompatActivity
                     // save the response as a list of movies
                     mMoviesList = response.body().getMovieArrayList();
                     // only display 20 posters
-                    String[] posters = new String[20];
-
-                    for (int i = 0; i < mMoviesList.size(); i++) {
-                        Movie movie = mMoviesList.get(i);
-                        String posterPath = movie.getPoster_path();
-                        posters[i] = "http://image.tmdb.org/t/p/w185/" + posterPath;
-                    }
+                    String[] posters = getPosters(mMoviesList);
 
                     mMoviePosterAdapter.setMoviePosterUrls(posters);
                 // handle network errors here
@@ -184,13 +203,7 @@ public class MainActivity extends AppCompatActivity
                 if (response.isSuccessful()) {
                     mMoviesList = response.body().getMovieArrayList();
 
-                    String[] posters = new String[20];
-
-                    for (int i = 0; i < mMoviesList.size(); i++) {
-                        Movie movie = mMoviesList.get(i);
-                        String posterPath = movie.getPoster_path();
-                        posters[i] = "http://image.tmdb.org/t/p/w185/" + posterPath;
-                    }
+                    String[] posters = getPosters(mMoviesList);
 
                     mMoviePosterAdapter.setMoviePosterUrls(posters);
                 } else {
@@ -208,5 +221,27 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(MainActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * Helper method returns array of posters from movies list to populate adapter
+     * @param movies
+     * @return
+     */
+    private String[] getPosters(ArrayList<Movie> movies) {
+        String[] posters;
+        if (movies.size() > 20) {
+            posters = new String[20];
+        } else {
+            posters = new String[movies.size()];
+        }
+
+
+        for (int i = 0; i < movies.size(); i++) {
+            Movie movie = movies.get(i);
+            String posterPath = movie.getPoster_path();
+            posters[i] = "http://image.tmdb.org/t/p/w185/" + posterPath;
+        }
+        return posters;
     }
 }
