@@ -51,12 +51,13 @@ public class MainActivity extends AppCompatActivity
     // flag to keep track of whether or not we are viewing favorites
     private Boolean showFavorites = false;
 
+    private static final String LIFECYCLE_MOVIES_TEXT_KEY = "movies";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         ButterKnife.bind(this);
 
         // Lay out posters in a dynamic 2x10 grid
@@ -68,11 +69,28 @@ public class MainActivity extends AppCompatActivity
 
         // Create handle for the RetrofitInstance interface
         service = RetrofitClientInstance.getRetrofitInstance().create(MovieService.class);
-        // To begin with, sort movies by popular
-        getPopularMovies();
-        // set db instance
+
         mDb = AppDatabase.getInstance(getApplicationContext());
 
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(LIFECYCLE_MOVIES_TEXT_KEY)) {
+                ArrayList<Movie> previouslyViewedMovies = savedInstanceState
+                        .getParcelableArrayList(LIFECYCLE_MOVIES_TEXT_KEY);
+                mMoviesList = previouslyViewedMovies;
+                // only display 20 posters
+                String[] posters = getPosters(mMoviesList);
+                mMoviePosterAdapter.setMoviePosterUrls(posters);
+            }
+        } else {
+            // To begin with, sort movies by popular
+            getPopularMovies();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(LIFECYCLE_MOVIES_TEXT_KEY, mMoviesList);
     }
 
     /**
@@ -90,7 +108,6 @@ public class MainActivity extends AppCompatActivity
                     Log.d(TAG, "Receiving database update from LiveData in ViewModel");
                     // only display 20 posters
                     String[] posters = getPosters(mMoviesList);
-
                     mMoviePosterAdapter.setMoviePosterUrls(posters);
                 }
             }
@@ -170,7 +187,6 @@ public class MainActivity extends AppCompatActivity
                     mMoviesList = response.body().getMovieArrayList();
                     // only display 20 posters
                     String[] posters = getPosters(mMoviesList);
-
                     mMoviePosterAdapter.setMoviePosterUrls(posters);
                 // handle network errors here
                 } else {
@@ -202,9 +218,7 @@ public class MainActivity extends AppCompatActivity
             public void onResponse(Call<MovieList> call, Response<MovieList> response) {
                 if (response.isSuccessful()) {
                     mMoviesList = response.body().getMovieArrayList();
-
                     String[] posters = getPosters(mMoviesList);
-
                     mMoviePosterAdapter.setMoviePosterUrls(posters);
                 } else {
                     try {
@@ -230,12 +244,12 @@ public class MainActivity extends AppCompatActivity
      */
     private String[] getPosters(ArrayList<Movie> movies) {
         String[] posters;
+
         if (movies.size() > 20) {
             posters = new String[20];
         } else {
             posters = new String[movies.size()];
         }
-
 
         for (int i = 0; i < movies.size(); i++) {
             Movie movie = movies.get(i);
