@@ -1,19 +1,11 @@
 package com.example.popularmovies.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-public class Video {
-
-//    {
-//        "id": "5c6d23b30e0a267f9d98cdff",
-//        "iso_639_1": "en",
-//        "iso_3166_1": "US",
-//        "key": "g4Hbz2jLxvQ",
-//        "name": "SPIDER-MAN: INTO THE SPIDER-VERSE - Official Trailer (HD)",
-//        "site": "YouTube",
-//        "size": 1080,
-//        "type": "Trailer"
-//    }
+public class Video implements Parcelable {
 
     @SerializedName("id")
     private String id;
@@ -86,4 +78,44 @@ public class Video {
 
     public void setType(String type) { this.type = type; }
 
+    // Implement Parcelable
+    protected Video(Parcel in) {
+        id = in.readString();
+        iso_639_1 = in.readString();
+        iso_3166_1 = in.readString();
+        key = in.readString();
+        name = in.readString();
+        site = in.readString();
+        size = in.readInt();
+        type = in.readString();
+    }
+
+    public static final Creator<Video> CREATOR = new Creator<Video>() {
+        @Override
+        public Video createFromParcel(Parcel parcel) {
+            return new Video(parcel);
+        }
+
+        @Override
+        public Video[] newArray(int i) {
+            return new Video[i];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeString(iso_639_1);
+        parcel.writeString(iso_3166_1);
+        parcel.writeString(key);
+        parcel.writeString(name);
+        parcel.writeString(site);
+        parcel.writeInt(size);
+        parcel.writeString(type);
+    }
 }

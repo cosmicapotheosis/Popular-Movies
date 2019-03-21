@@ -76,6 +76,7 @@ public class DetailActivity extends AppCompatActivity
     private List<Movie> mFavorites;
 
     private static final String LIFECYCLE_REVIEWS_TEXT_KEY = "reviews";
+    private static final String LIFECYCLE_VIDEOS_TEXT_KEY = "videos";
 
     /**
      * Check that a Movie object was passed as extra, then populate the UI based on that Movie data.
@@ -121,6 +122,13 @@ public class DetailActivity extends AppCompatActivity
                     mMovieReviewAdapter = new MovieReviewAdapter(mReviewsList);
                     mRecyclerViewReviews.setAdapter(mMovieReviewAdapter);
                 }
+                if (savedInstanceState.containsKey(LIFECYCLE_VIDEOS_TEXT_KEY)) {
+                    ArrayList<Video> previouslyViewedVideos = savedInstanceState
+                            .getParcelableArrayList(LIFECYCLE_VIDEOS_TEXT_KEY);
+                    mVideosList = previouslyViewedVideos;
+                    mMovieTrailerAdapter = new MovieTrailerAdapter(mVideosList.size(), DetailActivity.this);
+                    mRecyclerViewTrailers.setAdapter(mMovieTrailerAdapter);
+                }
             } else {
                 // Only if VideosList is empty do we make an API call
                 // There may be videos with no Trailers to list, this doesn't account for that
@@ -143,6 +151,7 @@ public class DetailActivity extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(LIFECYCLE_REVIEWS_TEXT_KEY, mReviewsList);
+        outState.putParcelableArrayList(LIFECYCLE_VIDEOS_TEXT_KEY, mVideosList);
     }
 
     private void retrieveFavorites() {
