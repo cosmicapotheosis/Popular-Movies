@@ -75,6 +75,8 @@ public class DetailActivity extends AppCompatActivity
     private AppDatabase mDb;
     private List<Movie> mFavorites;
 
+    private static final String LIFECYCLE_REVIEWS_TEXT_KEY = "reviews";
+
     /**
      * Check that a Movie object was passed as extra, then populate the UI based on that Movie data.
      * @param savedInstanceState
@@ -93,14 +95,6 @@ public class DetailActivity extends AppCompatActivity
         if (intentThatStartedThisActivity.hasExtra("Movie")) {
             // save movie info to member variable
             mMovie = intentThatStartedThisActivity.getParcelableExtra("Movie");
-            // Only if VideosList is empty do we make an API call
-            // There may be videos with no Trailers to list, this doesn't account for that
-            if (mVideosList.size() == 0) {
-                getVideosList();
-            }
-            if (mReviewsList.size() == 0) {
-                getReviewsList();
-            }
             // set up trailers recycler view
             LinearLayoutManager layoutManagerTrailers = new LinearLayoutManager(DetailActivity.this);
             mRecyclerViewTrailers.setLayoutManager(layoutManagerTrailers);
@@ -117,13 +111,38 @@ public class DetailActivity extends AppCompatActivity
             // initial filler adapter
             mMovieReviewAdapter = new MovieReviewAdapter(mReviewsList);
             mRecyclerViewReviews.setAdapter(mMovieReviewAdapter);
+
+            if (savedInstanceState != null) {
+                if (savedInstanceState.containsKey(LIFECYCLE_REVIEWS_TEXT_KEY)) {
+                    ArrayList<Review> previouslyViewedReviews = savedInstanceState
+                            .getParcelableArrayList(LIFECYCLE_REVIEWS_TEXT_KEY);
+                    mReviewsList = previouslyViewedReviews;
+                    // Update reviews recyclerview
+                    mMovieReviewAdapter = new MovieReviewAdapter(mReviewsList);
+                    mRecyclerViewReviews.setAdapter(mMovieReviewAdapter);
+                }
+            } else {
+                // Only if VideosList is empty do we make an API call
+                // There may be videos with no Trailers to list, this doesn't account for that
+                if (mVideosList.size() == 0) {
+                    getVideosList();
+                }
+                if (mReviewsList.size() == 0) {
+                    getReviewsList();
+                }
+            }
             // use movie info to populate UI
             populateUI();
             // set db instance
             mDb = AppDatabase.getInstance(getApplicationContext());
-
             retrieveFavorites();
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(LIFECYCLE_REVIEWS_TEXT_KEY, mReviewsList);
     }
 
     private void retrieveFavorites() {
