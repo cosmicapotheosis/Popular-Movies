@@ -308,7 +308,7 @@ public class DetailActivity extends AppCompatActivity
 
         // Set text info
         mVoteAverage.setText(Float.toString(mMovie.getVote_average()) + "/10");
-        mReleaseDate.setText(mMovie.getRelease_date().substring(0,4));
+        mReleaseDate.setText(mMovie.getRelease_date());
         mOverview.setText(mMovie.getOverview());
         mPopularity.setText(Float.toString(mMovie.getPopularity()));
         mVoteCount.setText("Out of " + mMovie.getVote_count() + " votes");
